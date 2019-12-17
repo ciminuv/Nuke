@@ -12,6 +12,7 @@ import Foundation
 public protocol DataCaching {
     /// Retrieves data from cache for the given key.
     func cachedData(for key: String) -> Data?
+    func cachedURL(for key: String) -> URL?
 
     /// Stores data for the given key.
     /// - note: The implementation must return immediately and store data
@@ -155,6 +156,18 @@ public final class DataCache: DataCaching {
             return nil
         }
         return try? Data(contentsOf: url)
+    }
+
+    public func cachedURL(for key: String) -> URL? {
+        guard let url = self.url(for: key) else {
+            return nil
+        }
+
+        flush()
+
+        let cacheExisted = FileManager.default.fileExists(atPath: url.path)
+
+        return cacheExisted ? url : nil
     }
 
     /// Stores data for the given key. The method returns instantly and the data
